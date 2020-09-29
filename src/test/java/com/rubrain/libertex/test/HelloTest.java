@@ -1,18 +1,24 @@
-package com.rubrain.libertex;
+package com.rubrain.libertex.test;
 
 import com.github.javafaker.Faker;
+import com.rubrain.libertex.AfterTestExtension;
+import com.rubrain.libertex.BeforeTestExtension;
+import com.rubrain.libertex.Logger;
 import com.rubrain.libertex.model.Client;
 import com.rubrain.libertex.rest.body.LoginBody;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 
-
+@ExtendWith({
+        BeforeTestExtension.class,
+        AfterTestExtension.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class HelloTest {
     protected static final Logger LOGGER = Logger.getInstance();
@@ -37,8 +43,6 @@ public class HelloTest {
 
     @Test
     public void hello200Test() {
-        LOGGER.logTest();
-
         given()
                 .when()
                 .header("X-Session-Id", this.sessionId)
@@ -49,8 +53,6 @@ public class HelloTest {
 
     @Test
     public void hello401Test() {
-        LOGGER.logTest();
-
         given()
                 .when()
                 .header("X-Session-Id", UUID.randomUUID().toString())
@@ -61,8 +63,6 @@ public class HelloTest {
 
     @Test
     public void hello500Test() {
-        LOGGER.logTest();
-
         given()
                 .when()
                 .header("X-Session-Id", this.sessionId)
