@@ -7,7 +7,7 @@ import lombok.experimental.Accessors;
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class HelloResponse {
+public class LoginResponse {
     private ResultCodeEnum resultCode;
-    private String message;
+    private String errorMessage;
 }
