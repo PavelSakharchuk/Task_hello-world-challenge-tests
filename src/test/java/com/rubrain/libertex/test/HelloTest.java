@@ -3,15 +3,20 @@ package com.rubrain.libertex.test;
 import com.github.javafaker.Faker;
 import com.rubrain.libertex.AfterTestExtension;
 import com.rubrain.libertex.BeforeTestExtension;
+import com.rubrain.libertex.Helper;
 import com.rubrain.libertex.Logger;
 import com.rubrain.libertex.model.Client;
-import com.rubrain.libertex.rest.body.LoginBody;
-import io.restassured.http.ContentType;
+import com.rubrain.libertex.rest.responses.HelloResponse;
+import org.apache.http.client.utils.URIBuilder;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
@@ -37,59 +42,101 @@ public class HelloTest {
                 .setFullName(fullName)
                 .setUsername(userName);
 
-        createClient(client);
-        this.sessionId = login(client);
+        Helper.createClient(client);
+        this.sessionId = Helper.login(client);
     }
 
     @Test
-    public void hello200Test() {
-        given()
+    public void helloOkResponse200Test() {
+        String expectedMessage = String.format("Hello, %s!", this.client.getFullName());
+
+        HelloResponse helloResponse = given()
                 .when()
                 .header("X-Session-Id", this.sessionId)
                 .get("/challenge/hello")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .extract()
+                .body().as(HelloResponse.class);
+
+        HelloResponse expectedResponseBody = new HelloResponse()
+                .setResultCode(HelloResponse.ResultCode.OK)
+                .setMessage(expectedMessage);
+
+        Assertions.assertEquals(helloResponse, expectedResponseBody);
     }
 
     @Test
-    public void hello401Test() {
-        given()
+    public void helloEmptySessionId401Test() {
+        HelloResponse helloResponse = given()
+                .when()
+                .header("X-Session-Id", "")
+                .get("/challenge/hello")
+                .then()
+                .statusCode(401)
+                .extract()
+                .body().as(HelloResponse.class);
+
+        HelloResponse expectedResponseBody = new HelloResponse()
+                .setResultCode(HelloResponse.ResultCode.UNAUTHORIZED);
+
+        Assertions.assertEquals(helloResponse, expectedResponseBody);
+    }
+
+    @Test
+    public void helloNotActualSessionId401Test() {
+        HelloResponse helloResponse = given()
                 .when()
                 .header("X-Session-Id", UUID.randomUUID().toString())
                 .get("/challenge/hello")
                 .then()
-                .statusCode(401);
+                .statusCode(401)
+                .extract()
+                .body().as(HelloResponse.class);
+
+        HelloResponse expectedResponseBody = new HelloResponse()
+                .setResultCode(HelloResponse.ResultCode.UNAUTHORIZED);
+
+        Assertions.assertEquals(helloResponse, expectedResponseBody);
     }
 
     @Test
-    public void hello500Test() {
-        given()
+    public void helloWithoutSessionId401Test() {
+        HelloResponse helloResponse = given()
                 .when()
-                .header("X-Session-Id", this.sessionId)
                 .get("/challenge/hello")
                 .then()
-                .statusCode(500);
+                .statusCode(401)
+                .extract()
+                .body().as(HelloResponse.class);
+
+        HelloResponse expectedResponseBody = new HelloResponse()
+                .setResultCode(HelloResponse.ResultCode.UNAUTHORIZED);
+
+        Assertions.assertEquals(helloResponse, expectedResponseBody);
     }
 
-    private void createClient(Client client) {
-        LOGGER.info(String.format("--- Create Client: %s ---", client));
+    @Test
+    public void helloSessionIdInURL401Test() throws MalformedURLException, URISyntaxException {
+        URIBuilder builder = new URIBuilder();
+        builder.setScheme("http");
+        builder.setHost("localhost");
+        builder.setPort(8080);
+        builder.setPath("/challenge/hello");
+        builder.addParameter("X-Session-Id", sessionId);
+        URL url = builder.build().toURL();
 
-        given()
-                .contentType(ContentType.JSON)
-                .body(client)
-                .post("/challenge/clients");
-    }
+        HelloResponse helloResponse = given()
+                .when()
+                .get(url)
+                .then()
+                .statusCode(401)
+                .extract()
+                .body().as(HelloResponse.class);
 
-    private String login(Client client) {
-        LOGGER.info(String.format("--- Login Client: %s ---", client));
+        HelloResponse expectedResponseBody = new HelloResponse()
+                .setResultCode(HelloResponse.ResultCode.UNAUTHORIZED);
 
-        LoginBody loginBody = new LoginBody()
-                .setUsername(client.getUsername());
-
-        return given()
-                .contentType(ContentType.JSON)
-                .body(loginBody)
-                .post("/challenge/login")
-                .header("X-Session-Id");
+        Assertions.assertEquals(helloResponse, expectedResponseBody);
     }
 }
