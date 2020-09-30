@@ -2,7 +2,7 @@
 
 Test for [hello-world-challenge](https://github.com/letsrokk/hello-world-challenge) application.
 
-## Run App and Run Tests with Docker-Compose.yaml
+## Run App and Run Tests with [Docker-Compose.yaml](https://docs.docker.com/compose/install/)
 
 ```
 version: '3.1'
@@ -24,7 +24,7 @@ services:
     network_mode: host
 ```
 
-## Building Documentation
+## Building Documentation For Docker-Compose.yaml
 
 1. Running App with Docker;
 2. Ubuntu image Building with following commands:
@@ -34,3 +34,17 @@ services:
     - git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git: Autotests repository cloning for run getting;
     - cd hello-world-challenge-tests: Jump to project folder for run maven commands;
     - mvn clean test: Running tests.
+    
+## Run App and Tests with Commands
+Run App with Java
+Latest version of JAR-file can be found in [Releases](https://github.com/letsrokk/hello-world-challenge/releases/latest) on GitHub
+```
+% java -jar hello-world-challenge-runner.jar 
+```
+
+Run Autotests
+```
+git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git
+cd hello-world-challenge-tests
+mvn clean test
+```
