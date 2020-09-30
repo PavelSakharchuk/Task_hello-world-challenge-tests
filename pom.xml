@@ -7,6 +7,14 @@
     <groupId>rubrain</groupId>
     <artifactId>libertex</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <hello-world-challenge.relese.version>v1.0.7</hello-world-challenge.relese.version>
+    </properties>
+
+
     <build>
         <plugins>
             <plugin>
@@ -22,6 +30,26 @@
                     <target>8</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <id>hello-world-challenge-runner.jar</id>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://github.com/letsrokk/hello-world-challenge/releases/download/${hello-world-challenge.relese.version}/hello-world-challenge-runner.jar</url>
+                            <outputFileName>hello-world-challenge-runner.jar</outputFileName>
+                            <outputDirectory>${project.basedir}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
