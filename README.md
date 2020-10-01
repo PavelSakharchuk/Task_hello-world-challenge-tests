@@ -18,22 +18,32 @@ services:
 
   tests:
     image: ubuntu
-    command: bash -c "apt-get update && apt-get -y install git && apt-get -y install maven && git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git && cd hello-world-challenge-tests && mvn clean test"
+    command: bash -c "
+        apt-get update && 
+        apt-get -y install git &&
+        apt-get -y install maven &&
+        git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git &&
+        cd hello-world-challenge-tests &&
+        mvn test surefire-report:report &&
+        cp /hello-world-challenge-tests/target/site/surefire-report.html /report"
     depends_on:
       - challenge
+    volumes:
+      - .:/report
     network_mode: host
 ```
 
 ## Building Documentation For Docker-Compose.yaml
 
 1. Running App with Docker;
-2. Ubuntu image Building with following commands:
+2. Ubuntu image Building with the following commands for running autotest with copying report near the docker-compose file:
     - apt-get update: Packages update;
     - apt-get -y install git: Git installation for repository clone;
     - apt-get -y install maven: Maven installation for build and run autotests;
     - git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git: Autotests repository cloning for run getting;
     - cd hello-world-challenge-tests: Jump to project folder for run maven commands;
-    - mvn clean test: Running tests.
+    - mvn test surefire-report:report: Running tests and generate report;
+    - cp /hello-world-challenge-tests/target/site/surefire-report.html /report: Copying report to report path;
     
 ## Run App and Tests with Commands
 Run App with Java
@@ -42,9 +52,9 @@ Latest version of JAR-file can be found in [Releases](https://github.com/letsrok
 % java -jar hello-world-challenge-runner.jar 
 ```
 
-Run Autotests
+Run Autotests (report is in the 'target/site' folder after run autotest)
 ```
 git clone https://github.com/PavelSakharchuk/hello-world-challenge-tests.git
 cd hello-world-challenge-tests
-mvn clean test
+mvn clean test surefire-report:report
 ```
